@@ -2,10 +2,13 @@ import os
 import requests
 import pandas as pd
 from dotenv import load_dotenv
-from langchain_gigachat.chat_models import GigaChat
+from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
+
+# Загружаем переменные окружения из .env
 load_dotenv()
+
 LOGINOM_URL = "https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/GetUserHistory"
 USER_ID = 1
 
@@ -17,7 +20,6 @@ payload = {
 
 response = requests.post(LOGINOM_URL, json=payload, timeout=30)
 response.raise_for_status()
-
 rows = response.json()["DataSet"]["Rows"]
 
 # преобразуем ответ сервиса в датафрейм
@@ -38,15 +40,13 @@ products_text = "\n".join(lines)
 print(products_text)
 
 
-
-api_key = os.getenv("GIGA_KEY")
+api_key = os.getenv("MISTRAL")
 if not api_key:
-    raise ValueError("Ключ GIGA_KEY не найден в .env")
+    raise ValueError("Ключ MISTRAL_API_KEY не найден в .env")
 
-llm = GigaChat(
-    credentials=api_key,
-    model="GigaChat-2",
-    verify_ssl_certs=False,
+llm = ChatMistralAI(
+    api_key=api_key,
+    model="mistral-large-latest",
     temperature=0.3,
     max_tokens=500
 )
@@ -73,6 +73,7 @@ messages = [
     SystemMessage(content=system_prompt),
     HumanMessage(content=user_prompt)
 ]
+
 
 result = llm.invoke(messages)
 print(result.content)
