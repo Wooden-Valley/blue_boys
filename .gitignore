@@ -1,0 +1,14 @@
+# Базы данных — слишком большие для GitHub (лимит 100 МБ на файл)
+*.sqlite
+*.sqlite3
+*.db
+
+# Виртуальное окружение Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Системные файлы
+.DS_Store
+Thumbs.db
