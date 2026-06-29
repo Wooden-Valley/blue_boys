@@ -1,0 +1,2 @@
+База данных Instacart на SQLLite:
+https://cloud.mail.ru/public/CSk2/HHGMfHsyj
