@@ -174,7 +174,7 @@ def api_history():
 if __name__ == "__main__":
     import os
 
-    port = int(os.environ.get("PORT", 5001))
+    port = int(os.environ.get("PORT", 8000))
     debug_mode = "PORT" not in os.environ
 
-    app.run(host="0.0.0.0", port=port, debug=debug_mode)
+    app.run(host="0.0.0.0", port=port)
