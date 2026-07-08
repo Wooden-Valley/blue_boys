@@ -1,0 +1,8 @@
+https://edu.loginom.dev/app/
+
+https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/GetUserHistory
+https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/CheckUserID
+
+https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/GetForgottenProducts
+https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/GetPurchaseRhythm
+https://edu.loginom.dev/lgi/rest/instacart_ws_Abakarov1/GetClientSummaryы

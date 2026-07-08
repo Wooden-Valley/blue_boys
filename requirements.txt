@@ -1,9 +1,7 @@
-# Зависимости всего проекта (веб-приложение + ноутбуки-прототипы).
-# Для деплоя только веб-приложения см. webapp/requirements.txt
 flask>=3.0
 requests>=2.31
 langchain-mistralai>=1.0
 langchain-core>=0.3
 python-dotenv>=1.0
-pandas>=2.0          # используется в notebooks/
+pandas>=2.0         
 pytest>=8.0
