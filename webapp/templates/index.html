@@ -2,25 +2,110 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Instacart Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instacart Client Insights</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 960px; margin: 30px auto; padding: 0 16px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    input, button { padding: 10px 12px; font-size: 16px; }
+    :root {
+      --accent: #5b47e0;
+      --accent-light: #ece8fd;
+      --ok: #0a7a2f;
+      --error: #b00020;
+      --muted: #6b7280;
+      --border: #e3e3e8;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+      color: #1f2430;
+      background: #fafafc;
+    }
+    header.hero {
+      background: linear-gradient(135deg, var(--accent), #8f7ff5);
+      color: #fff;
+      margin: 0 -16px 24px;
+      padding: 32px 16px;
+      border-radius: 0 0 20px 20px;
+    }
+    header.hero h1 { margin: 0 0 6px; font-size: 26px; }
+    header.hero p { margin: 0; opacity: 0.9; }
+    .card {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(20, 20, 40, 0.04);
+    }
+    .card h2 { margin-top: 0; font-size: 18px; }
+    .step-label {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    input, button {
+      padding: 10px 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #4a39c2; }
+    .services { display: flex; flex-wrap: wrap; gap: 10px; }
+    .services form { margin: 0; }
+    .services button.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+    .services button.secondary:hover { background: var(--accent-light); }
+    .services button.active { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
     table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f3f3f3; }
-    .muted { color: #666; }
-    .ok { color: #0a7a2f; font-weight: 700; }
-    .error { color: #b00020; font-weight: 700; }
-    pre { white-space: pre-wrap; background: #f8f8f8; padding: 12px; border-radius: 8px; }
+    th, td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    th { background: #f3f3f6; }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); font-weight: 700; }
+    .error { color: var(--error); font-weight: 700; }
+    pre { white-space: pre-wrap; background: #f8f8fa; padding: 12px; border-radius: 8px; }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+    .badge.cache { background: #e6f4ea; color: var(--ok); }
+    .badge.fresh { background: var(--accent-light); color: var(--accent); }
+    .bars { margin-top: 18px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .bar-label { width: 220px; flex-shrink: 0; font-size: 13px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; background: #f0f0f4; border-radius: 6px; overflow: hidden; height: 14px; }
+    .bar-fill { background: var(--accent); height: 100%; border-radius: 6px; }
+    .bar-value { width: 40px; text-align: right; font-size: 12px; color: var(--muted); }
+    .metrics { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+    .metric { flex: 1 1 140px; background: #f8f8fc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .metric .value { font-size: 24px; font-weight: 700; color: var(--accent); }
+    .metric .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
   </style>
 </head>
 <body>
-  <h1>Instacart demo: Loginom + Flask + Mistral</h1>
+  <header class="hero">
+    <h1>Instacart Client Insights</h1>
+    <p>Loginom (аналитика) + Flask (веб-приложение) + Mistral (рекомендации)</p>
+  </header>
 
   <div class="card">
-    <h2>1. Авторизация клиента</h2>
+    <span class="step-label">Шаг 1</span>
+    <h2>Авторизация клиента</h2>
     <form method="post" action="/login">
       <input type="number" name="user_id" placeholder="Введите user_id" required>
       <button type="submit">Авторизоваться</button>
@@ -36,57 +121,107 @@
   </div>
 
   <div class="card">
-    <h2>2. Демо-сервис</h2>
-    <p class="muted">Получить топ-10 товаров клиента из Loginom и передать их в промпт Mistral.</p>
-    <form method="post" action="/history">
-      <button type="submit">Запустить анализ</button>
-    </form>
+    <span class="step-label">Шаг 2</span>
+    <h2>Аналитические сервисы</h2>
+    {% if user_id %}
+      <p class="muted">Выберите сервис — результат и комментарий Mistral появятся ниже.</p>
+      <div class="services">
+        {% for s in services %}
+        <form method="post" action="/service/{{ s.key }}">
+          <button type="submit" class="{% if s.key == active_service %}active{% else %}secondary{% endif %}">{{ s.title }}</button>
+        </form>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">Сначала авторизуйтесь по user_id.</p>
+    {% endif %}
   </div>
 
   {% if error %}
     <div class="card"><p class="error">{{ error }}</p></div>
   {% endif %}
 
-  {% if products %}
+  {% if result_note %}
     <div class="card">
-      <h2>3. Топ-10 товаров клиента</h2>
+      <span class="step-label">{{ service_title }}</span>
+      <p class="muted">{{ result_note }}</p>
+    </div>
+  {% endif %}
+
+  {% if result_view == "table" and rows %}
+    <div class="card">
+      <span class="step-label">{{ service_title }}</span>
+      <h2>{{ service_title }}</h2>
       <table>
         <thead>
           <tr>
             <th>#</th>
-            <th>Товар</th>
-            <th>Aisle</th>
-            <th>Department</th>
-            <th>Department (RU)</th>
-            <th>Order count</th>
+            {% for c in columns %}<th>{{ c.label }}</th>{% endfor %}
           </tr>
         </thead>
         <tbody>
-          {% for p in products %}
+          {% for r in rows %}
           <tr>
             <td>{{ loop.index }}</td>
-            <td>{{ p.product_name }}</td>
-            <td>{{ p.aisle }}</td>
-            <td>{{ p.department }}</td>
-            <td>{{ p.department_rus }}</td>
-            <td>{{ p.order_count }}</td>
+            {% for c in columns %}<td>{{ r[c.key] }}</td>{% endfor %}
           </tr>
           {% endfor %}
         </tbody>
       </table>
+
+      {% if bars %}
+      <div class="bars">
+        {% for b in bars %}
+        <div class="bar-row">
+          <div class="bar-label" title="{{ b.label }}">{{ b.label }}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: {{ b.pct }}%"></div>
+          </div>
+          <div class="bar-value">{{ b.value }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if result_view == "metrics" and metrics %}
+    <div class="card">
+      <span class="step-label">{{ service_title }}</span>
+      <h2>{{ service_title }}</h2>
+      <div class="metrics">
+        {% for m in metrics %}
+        <div class="metric">
+          <div class="value">{{ m.value }}</div>
+          <div class="label">{{ m.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
   {% endif %}
 
   {% if prompt_text %}
     <div class="card">
-      <h2>4. Текст, который ушёл в промпт</h2>
+      <span class="step-label">Промпт</span>
+      <h2>Текст, который ушёл в промпт</h2>
       <pre>{{ prompt_text }}</pre>
     </div>
   {% endif %}
 
   {% if recommendation %}
     <div class="card">
-      <h2>5. Ответ Mistral</h2>
+      <span class="step-label">LLM</span>
+      <h2>
+        Ответ Mistral
+        {% if from_cache %}
+          <span class="badge cache">из кэша</span>
+        {% else %}
+          <span class="badge fresh">новый запрос</span>
+        {% endif %}
+      </h2>
+      {% if response_time_ms is not none %}
+        <p class="muted">Время ответа: {{ response_time_ms }} мс</p>
+      {% endif %}
       <pre>{{ recommendation }}</pre>
     </div>
   {% endif %}
