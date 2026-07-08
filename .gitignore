@@ -3,15 +3,24 @@
 *.sqlite3
 *.db
 
+# Локальный кэш ответов LLM (генерируется во время работы приложения)
+webapp/llm_cache.json
+
 # Виртуальное окружение Python
 venv/
 .venv/
 __pycache__/
 *.pyc
 
-# Системные файлы
+# Кэш pytest
+.pytest_cache/
+
+# Системные и редакторские файлы
 .DS_Store
 Thumbs.db
+.claude/
+.vscode/
+.idea/
 
 .env
-methodichka/preza
+docs/methodichka/preza
