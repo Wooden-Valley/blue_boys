@@ -20,6 +20,7 @@ SERVICES = {
         "build_text": "build_products_text",
         "ask": "ask_mistral",
         "view": "table",
+        "page": "history",
         "columns": [
             {"label": "Товар", "key": "product_name"},
             {"label": "Категория", "key": "aisle"},
@@ -27,6 +28,7 @@ SERVICES = {
             {"label": "Покупок", "key": "order_count"},
         ],
         "bar": {"label": "product_name", "value": "order_count"},
+        "chart": {"labels": "product_name", "values": "order_count", "kind": "bar", "title": "Частота покупок"},
         "empty_msg": "Loginom вернул пустой список товаров",
     },
     "forgotten": {
@@ -36,6 +38,7 @@ SERVICES = {
         "build_text": "build_forgotten_text",
         "ask": "ask_forgotten",
         "view": "table",
+        "page": "insights",
         "columns": [
             {"label": "Товар", "key": "product_name"},
             {"label": "Отдел", "key": "department_rus"},
@@ -53,6 +56,7 @@ SERVICES = {
         "build_text": "build_rhythm_text",
         "ask": "ask_rhythm",
         "view": "metrics",
+        "page": "insights",
         "format": "format_rhythm",
         "empty_msg": "Недостаточно данных о заказах клиента.",
     },
@@ -63,13 +67,40 @@ SERVICES = {
         "build_text": "build_summary_text",
         "ask": "ask_summary",
         "view": "metrics",
+        "page": "insights",
         "format": "format_summary",
         "empty_msg": "Недостаточно данных для сводки.",
     },
+    "departments": {
+        "title": "Отделы и категории",
+        "subtitle": "Из каких отделов состоят покупки клиента.",
+        "get": "get_department_stats",
+        "build_text": "build_departments_text",
+        "ask": "ask_departments",
+        "view": "table",
+        "page": "insights",
+        "columns": [
+            {"label": "Отдел", "key": "department_rus"},
+            {"label": "Покупок", "key": "order_count"},
+            {"label": "Доля, %", "key": "share"},
+        ],
+        "bar": {"label": "department_rus", "value": "order_count"},
+        "chart": {"labels": "department_rus", "values": "order_count", "kind": "doughnut", "title": "Доля отделов"},
+        "empty_msg": "Недостаточно данных по отделам.",
+    },
 }
 
-# Порядок кнопок сервисов в интерфейсе.
-SERVICE_MENU = [{"key": k, "title": SERVICES[k]["title"]} for k in ("history", "forgotten", "rhythm", "summary")]
+# Разделы (страницы) приложения и относящиеся к ним сервисы.
+PAGES = {
+    "home": {"title": "Личный кабинет", "services": []},
+    "history": {"title": "Мои покупки", "services": ["history"]},
+    "insights": {"title": "Аналитика", "services": ["forgotten", "rhythm", "summary", "departments"]},
+}
+NAV = [
+    {"page": "home", "url": "/", "title": "Кабинет"},
+    {"page": "history", "url": "/history", "title": "Мои покупки"},
+    {"page": "insights", "url": "/insights", "title": "Аналитика"},
+]
 
 
 def load_business_rules():
@@ -83,10 +114,28 @@ def load_business_rules():
     return module
 
 
-def render_index(**overrides):
+def _page_services(page):
+    return [{"key": k, "title": SERVICES[k]["title"], "subtitle": SERVICES[k]["subtitle"]}
+            for k in PAGES.get(page, {}).get("services", [])]
+
+
+def _find_banner():
+    for ext in ("png", "jpg", "jpeg", "webp"):
+        if (BASE_DIR / "static" / f"banner.{ext}").exists():
+            return f"banner.{ext}"
+    return None
+
+
+def render_index(page="home", **overrides):
+    banner_file = _find_banner()
     context = {
         "user_id": session.get("user_id"),
-        "services": SERVICE_MENU,
+        "nav": NAV,
+        "page": page,
+        "page_title": PAGES.get(page, {}).get("title", ""),
+        "services": _page_services(page),
+        "banner_file": banner_file,
+        "has_banner": banner_file is not None,
         "active_service": None,
         "service_title": None,
         "result_view": None,
@@ -94,6 +143,7 @@ def render_index(**overrides):
         "rows": None,
         "bars": None,
         "metrics": None,
+        "chart": None,
         "result_note": None,
         "prompt_text": None,
         "recommendation": None,
@@ -120,14 +170,24 @@ def _build_bars(rows, bar_cfg):
     ]
 
 
+def _build_chart(rows, chart_cfg):
+    return {
+        "kind": chart_cfg["kind"],
+        "title": chart_cfg["title"],
+        "labels": [str(row[chart_cfg["labels"]]) for row in rows],
+        "values": [row[chart_cfg["values"]] for row in rows],
+    }
+
+
 def run_service(service_key, as_json=False):
     cfg = SERVICES[service_key]
+    page = cfg["page"]
 
     user_id = session.get("user_id")
     if not user_id:
         if as_json:
             return jsonify({"error": "Сначала авторизуйтесь"}), 403
-        return render_index(user_id=None, error="Сначала авторизуйтесь по user_id")
+        return render_index(page=page, user_id=None, error="Сначала авторизуйтесь по user_id")
 
     try:
         rules = load_business_rules()
@@ -135,12 +195,13 @@ def run_service(service_key, as_json=False):
     except Exception as e:
         if as_json:
             return jsonify({"error": str(e)}), 500
-        return render_index(user_id=user_id, error=f"Ошибка: {e}")
+        return render_index(page=page, user_id=user_id, error=f"Ошибка: {e}")
 
     if not rows:
         if as_json:
             return jsonify({"user_id": user_id, "service": service_key, "rows": [], "message": cfg["empty_msg"]})
         return render_index(
+            page=page,
             user_id=user_id,
             active_service=service_key,
             service_title=cfg["title"],
@@ -158,7 +219,7 @@ def run_service(service_key, as_json=False):
     except Exception as e:
         if as_json:
             return jsonify({"error": str(e)}), 500
-        return render_index(user_id=user_id, error=f"Ошибка: {e}")
+        return render_index(page=page, user_id=user_id, error=f"Ошибка: {e}")
 
     if as_json:
         return jsonify({
@@ -177,10 +238,13 @@ def run_service(service_key, as_json=False):
         view_data["rows"] = rows
         if cfg.get("bar"):
             view_data["bars"] = _build_bars(rows, cfg["bar"])
+        if cfg.get("chart"):
+            view_data["chart"] = _build_chart(rows, cfg["chart"])
     else:
         view_data["metrics"] = getattr(rules, cfg["format"])(rows[0])
 
     return render_index(
+        page=page,
         user_id=user_id,
         active_service=service_key,
         service_title=cfg["title"],
@@ -198,8 +262,17 @@ def index():
     startup_error = None
     if not (BASE_DIR / "business-rules.py").exists():
         startup_error = "Файл business-rules.py не найден. "
+    return render_index(page="home", error=startup_error)
 
-    return render_index(error=startup_error)
+
+@app.route("/history", methods=["GET"])
+def history_page():
+    return render_index(page="history")
+
+
+@app.route("/insights", methods=["GET"])
+def insights_page():
+    return render_index(page="insights")
 
 
 @app.route("/login", methods=["POST"])
@@ -220,7 +293,7 @@ def login():
         return render_index(user_id=None, error="Клиент с таким user_id не найден в Loginom")
 
     session["user_id"] = user_id
-    return render_index(user_id=user_id)
+    return render_index(page="history", user_id=user_id)
 
 
 @app.route("/logout", methods=["POST"])

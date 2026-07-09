@@ -236,6 +236,38 @@ def test_unknown_service_returns_404(client):
 
 @patch("langchain_mistralai.ChatMistralAI")
 @patch("requests.post")
+def test_departments_service_aggregates_and_charts(mock_post, mock_llm_cls, client):
+    mock_post.return_value = fake_loginom_response(SAMPLE_ROWS)
+    _login_service_test(client, mock_llm_cls, content="Вы любите молочное")
+
+    resp = client.post("/service/departments")
+
+    assert resp.status_code == 200
+    assert "Отделы и категории".encode("utf-8") in resp.data
+    # доля отделов складывается в 100% (12 и 7 из SAMPLE_ROWS)
+    assert "Овощи и фрукты".encode("utf-8") in resp.data
+    assert "svcChart".encode("utf-8") in resp.data  # блок Chart.js отрисован
+    assert "Вы любите молочное".encode("utf-8") in resp.data
+
+
+def test_insights_page_lists_services(client):
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+    resp = client.get("/insights")
+    assert resp.status_code == 200
+    assert "Забытые товары".encode("utf-8") in resp.data
+    assert "Отделы и категории".encode("utf-8") in resp.data
+
+
+def test_home_page_shows_banner_area(client):
+    resp = client.get("/")
+    assert resp.status_code == 200
+    # либо вставленный баннер, либо слот-заглушка — в обоих случаях класс "banner"
+    assert b"banner" in resp.data
+
+
+@patch("langchain_mistralai.ChatMistralAI")
+@patch("requests.post")
 def test_service_second_identical_request_uses_cache(mock_post, mock_llm_cls, client):
     mock_post.return_value = fake_loginom_response([RHYTHM_ROW])
     _login_service_test(client, mock_llm_cls, content="Текст про ритм")

@@ -59,6 +59,22 @@ def get_client_summary(user_id: int):
     return _call_loginom("GetClientSummary", user_id)
 
 
+def get_department_stats(user_id: int):
+    # Самостоятельный сервис: агрегирует историю покупок клиента по отделам
+    # прямо в приложении, отдельного веб-сервиса Loginom не требует.
+    rows = get_user_history(user_id)
+    totals = {}
+    for r in rows:
+        dep = r["department_rus"]
+        totals[dep] = totals.get(dep, 0) + r["order_count"]
+
+    grand = sum(totals.values()) or 1
+    return [
+        {"department_rus": dep, "order_count": cnt, "share": round(cnt / grand * 100)}
+        for dep, cnt in sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Подготовка текста для LLM и форматирование метрик для интерфейса
 # ---------------------------------------------------------------------------
@@ -115,6 +131,16 @@ def build_rhythm_text(row):
 
 def build_summary_text(row):
     return "; ".join(f"{m['label']}: {m['value']}" for m in format_summary(row))
+
+
+def build_departments_text(rows):
+    lines = []
+    for i, row in enumerate(rows, start=1):
+        lines.append(
+            f"{i}. {row['department_rus']} — покупок: {row['order_count']}, "
+            f"доля: {row['share']}%"
+        )
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -231,3 +257,18 @@ def ask_summary(user_id: int, summary_text: str):
 и на что ему стоит обратить внимание."""
 
     return _cached_llm(_service_key("summary", user_id, summary_text), system_prompt, user_prompt)
+
+
+def ask_departments(user_id: int, departments_text: str):
+    system_prompt = """Ты — дружелюбный аналитик покупательского поведения.
+По распределению покупок клиента по отделам кратко описываешь, какой это тип покупателя.
+Обращайся к клиенту на "вы". Пиши 3–4 предложения."""
+
+    user_prompt = f"""Распределение покупок клиента (id={user_id}) по отделам:
+
+{departments_text}
+
+Определите, какой тип покупателя получается по этим данным,
+и дайте короткий дружелюбный вывод."""
+
+    return _cached_llm(_service_key("departments", user_id, departments_text), system_prompt, user_prompt)
