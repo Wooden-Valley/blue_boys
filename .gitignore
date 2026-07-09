@@ -20,6 +20,7 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+~$*.docx
 
 .env
 docs/methodichka/preza
