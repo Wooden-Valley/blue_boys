@@ -3,47 +3,87 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instacart Client Insights</title>
+  <title>Instacart Insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root {
-      --accent: #5b47e0;
-      --accent-light: #ece8fd;
+      --accent: #2e9e5b;
+      --accent-dark: #217a45;
+      --accent-light: #e6f4ec;
       --ok: #0a7a2f;
       --error: #b00020;
       --muted: #6b7280;
       --border: #e3e3e8;
     }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      max-width: 960px;
+      font-family: 'Nunito', Arial, sans-serif;
+      max-width: 980px;
       margin: 0 auto;
-      padding: 0 16px 40px;
+      padding: 0 16px 48px;
       color: #1f2430;
       background: #fafafc;
     }
+    nav.topnav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 0;
+      flex-wrap: wrap;
+    }
+    nav.topnav .brand {
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--accent-dark);
+      margin-right: auto;
+    }
+    nav.topnav a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 999px;
+    }
+    nav.topnav a.active { background: var(--accent); color: #fff; }
+    nav.topnav a:not(.active):hover { background: var(--accent-light); }
     header.hero {
-      background: linear-gradient(135deg, var(--accent), #8f7ff5);
+      background: linear-gradient(135deg, var(--accent), #6fce97);
       color: #fff;
-      margin: 0 -16px 24px;
-      padding: 32px 16px;
-      border-radius: 0 0 20px 20px;
+      margin: 0 0 24px;
+      padding: 30px 24px;
+      border-radius: 18px;
     }
     header.hero h1 { margin: 0 0 6px; font-size: 26px; }
-    header.hero p { margin: 0; opacity: 0.9; }
+    header.hero p { margin: 0; opacity: 0.92; }
+    .banner { margin: 0 0 24px; border-radius: 18px; overflow: hidden; }
+    .banner img { width: 100%; display: block; }
+    .banner-slot {
+      border: 2px dashed var(--accent);
+      background: var(--accent-light);
+      border-radius: 18px;
+      padding: 26px;
+      text-align: center;
+      color: var(--accent-dark);
+      margin: 0 0 24px;
+      font-weight: 700;
+    }
     .card {
       border: 1px solid var(--border);
       background: #fff;
       border-radius: 14px;
       padding: 20px 22px;
       margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(20, 20, 40, 0.04);
+      box-shadow: 0 1px 3px rgba(20, 20, 40, 0.05);
     }
     .card h2 { margin-top: 0; font-size: 18px; }
     .step-label {
       display: inline-block;
       background: var(--accent-light);
-      color: var(--accent);
-      font-weight: 700;
+      color: var(--accent-dark);
+      font-weight: 800;
       font-size: 12px;
       padding: 2px 10px;
       border-radius: 999px;
@@ -54,37 +94,44 @@
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid var(--border);
+      font-family: inherit;
     }
     button {
       background: var(--accent);
       color: #fff;
       border: none;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
     }
-    button:hover { background: #4a39c2; }
+    button:hover { background: var(--accent-dark); }
+    .nav-cards { display: flex; flex-wrap: wrap; gap: 14px; }
+    .nav-cards a {
+      flex: 1 1 220px;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      background: #fff;
+      transition: box-shadow .15s;
+    }
+    .nav-cards a:hover { box-shadow: 0 4px 14px rgba(20,20,40,.08); }
+    .nav-cards h3 { margin: 0 0 6px; color: var(--accent-dark); }
+    .nav-cards p { margin: 0; color: var(--muted); font-size: 14px; }
     .services { display: flex; flex-wrap: wrap; gap: 10px; }
     .services form { margin: 0; }
-    .services button.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+    .services button.secondary { background: #fff; color: var(--accent-dark); border: 1px solid var(--accent); }
     .services button.secondary:hover { background: var(--accent-light); }
-    .services button.active { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
     table { width: 100%; border-collapse: collapse; margin-top: 16px; }
     th, td { border: 1px solid var(--border); padding: 8px; text-align: left; }
     th { background: #f3f3f6; }
     .muted { color: var(--muted); }
-    .ok { color: var(--ok); font-weight: 700; }
-    .error { color: var(--error); font-weight: 700; }
-    pre { white-space: pre-wrap; background: #f8f8fa; padding: 12px; border-radius: 8px; }
-    .badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-left: 8px;
-    }
+    .ok { color: var(--ok); font-weight: 800; }
+    .error { color: var(--error); font-weight: 800; }
+    pre { white-space: pre-wrap; background: #f8f8fa; padding: 12px; border-radius: 8px; font-family: 'Nunito', sans-serif; }
+    .badge { display: inline-block; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; margin-left: 8px; }
     .badge.cache { background: #e6f4ea; color: var(--ok); }
-    .badge.fresh { background: var(--accent-light); color: var(--accent); }
+    .badge.fresh { background: var(--accent-light); color: var(--accent-dark); }
     .bars { margin-top: 18px; }
     .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .bar-label { width: 220px; flex-shrink: 0; font-size: 13px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -93,15 +140,32 @@
     .bar-value { width: 40px; text-align: right; font-size: 12px; color: var(--muted); }
     .metrics { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
     .metric { flex: 1 1 140px; background: #f8f8fc; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-    .metric .value { font-size: 24px; font-weight: 700; color: var(--accent); }
+    .metric .value { font-size: 24px; font-weight: 800; color: var(--accent-dark); }
     .metric .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .llm-row { display: flex; gap: 14px; align-items: flex-start; }
+    .mascot { font-size: 34px; line-height: 1; }
   </style>
 </head>
 <body>
-  <header class="hero">
-    <h1>Instacart Client Insights</h1>
-    <p>Loginom (аналитика) + Flask (веб-приложение) + Mistral (рекомендации)</p>
-  </header>
+  <nav class="topnav">
+    <span class="brand">🥕 Instacart Insights</span>
+    {% for item in nav %}
+      <a href="{{ item.url }}" class="{% if item.page == page %}active{% endif %}">{{ item.title }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if page == "home" %}
+    <header class="hero">
+      <h1>Личный кабинет клиента Instacart</h1>
+      <p>Аналитика Loginom + Flask + рекомендации Mistral</p>
+    </header>
+
+    {% if has_banner %}
+      <div class="banner"><img src="{{ url_for('static', filename=banner_file) }}" alt="Instacart Insights"></div>
+    {% else %}
+      <div class="banner-slot">🖼️ Здесь будет баннер, сгенерированный нейросетью — положите файл <code>webapp/static/banner.png</code></div>
+    {% endif %}
+  {% endif %}
 
   <div class="card">
     <span class="step-label">Шаг 1</span>
@@ -113,29 +177,42 @@
     {% if user_id %}
       <p class="ok">Текущий клиент: {{ user_id }}</p>
       <form method="post" action="/logout">
-        <button type="submit">Выйти</button>
+        <button type="submit" class="secondary">Выйти</button>
       </form>
     {% else %}
       <p class="muted">Клиент не выбран</p>
     {% endif %}
   </div>
 
-  <div class="card">
-    <span class="step-label">Шаг 2</span>
-    <h2>Аналитические сервисы</h2>
-    {% if user_id %}
-      <p class="muted">Выберите сервис — результат и комментарий Mistral появятся ниже.</p>
-      <div class="services">
-        {% for s in services %}
-        <form method="post" action="/service/{{ s.key }}">
-          <button type="submit" class="{% if s.key == active_service %}active{% else %}secondary{% endif %}">{{ s.title }}</button>
-        </form>
-        {% endfor %}
+  {% if page == "home" %}
+    <div class="card">
+      <span class="step-label">Разделы</span>
+      <h2>Куда дальше</h2>
+      <div class="nav-cards">
+        <a href="/history"><h3>Мои покупки →</h3><p>Топ-10 товаров и персональная рекомендация.</p></a>
+        <a href="/insights"><h3>Аналитика →</h3><p>Забытые товары, ритм покупок, сводка и отделы.</p></a>
       </div>
-    {% else %}
-      <p class="muted">Сначала авторизуйтесь по user_id.</p>
-    {% endif %}
-  </div>
+    </div>
+  {% endif %}
+
+  {% if services %}
+    <div class="card">
+      <span class="step-label">Шаг 2</span>
+      <h2>{{ page_title }}</h2>
+      {% if user_id %}
+        <p class="muted">Выберите сервис — результат и комментарий Mistral появятся ниже.</p>
+        <div class="services">
+          {% for s in services %}
+          <form method="post" action="/service/{{ s.key }}">
+            <button type="submit" class="{% if s.key == active_service %}{% else %}secondary{% endif %}" title="{{ s.subtitle }}">{{ s.title }}</button>
+          </form>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Сначала авторизуйтесь по user_id.</p>
+      {% endif %}
+    </div>
+  {% endif %}
 
   {% if error %}
     <div class="card"><p class="error">{{ error }}</p></div>
@@ -174,9 +251,7 @@
         {% for b in bars %}
         <div class="bar-row">
           <div class="bar-label" title="{{ b.label }}">{{ b.label }}</div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width: {{ b.pct }}%"></div>
-          </div>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ b.pct }}%"></div></div>
           <div class="bar-value">{{ b.value }}</div>
         </div>
         {% endfor %}
@@ -200,6 +275,37 @@
     </div>
   {% endif %}
 
+  {% if chart %}
+    <div class="card">
+      <span class="step-label">График</span>
+      <h2>{{ chart.title }}</h2>
+      <canvas id="svcChart" height="130"></canvas>
+    </div>
+    <script>
+      (function () {
+        const cfg = {{ chart | tojson }};
+        const palette = ['#2e9e5b', '#6fce97', '#f2b134', '#e06c4a', '#5b8def', '#9b6fce', '#39b8b0', '#d95d8a'];
+        const single = cfg.kind === 'bar';
+        new Chart(document.getElementById('svcChart'), {
+          type: cfg.kind,
+          data: {
+            labels: cfg.labels,
+            datasets: [{
+              label: cfg.title,
+              data: cfg.values,
+              backgroundColor: single ? '#2e9e5b' : cfg.labels.map((_, i) => palette[i % palette.length]),
+              borderRadius: single ? 6 : 0
+            }]
+          },
+          options: {
+            plugins: { legend: { display: !single } },
+            scales: single ? { y: { beginAtZero: true } } : {}
+          }
+        });
+      })();
+    </script>
+  {% endif %}
+
   {% if prompt_text %}
     <div class="card">
       <span class="step-label">Промпт</span>
@@ -213,16 +319,13 @@
       <span class="step-label">LLM</span>
       <h2>
         Ответ Mistral
-        {% if from_cache %}
-          <span class="badge cache">из кэша</span>
-        {% else %}
-          <span class="badge fresh">новый запрос</span>
-        {% endif %}
+        {% if from_cache %}<span class="badge cache">из кэша</span>{% else %}<span class="badge fresh">новый запрос</span>{% endif %}
       </h2>
-      {% if response_time_ms is not none %}
-        <p class="muted">Время ответа: {{ response_time_ms }} мс</p>
-      {% endif %}
-      <pre>{{ recommendation }}</pre>
+      {% if response_time_ms is not none %}<p class="muted">Время ответа: {{ response_time_ms }} мс</p>{% endif %}
+      <div class="llm-row">
+        <div class="mascot">🥕</div>
+        <pre style="flex:1">{{ recommendation }}</pre>
+      </div>
     </div>
   {% endif %}
 </body>
